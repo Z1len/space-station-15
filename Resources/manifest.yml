@@ -2,9 +2,4 @@
 windowIconSet: /Textures/Logo/icon # Corvax-Theme
 splashLogo: /Textures/Logo/logo.png # Corvax-Theme
 
-clientAssemblies:
-  - Content.Client
-  - Content.Shared
-  - Content.Shared.Database
-
 # PJB PLEASE
