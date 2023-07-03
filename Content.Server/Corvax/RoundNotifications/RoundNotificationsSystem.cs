@@ -19,11 +19,9 @@ public sealed class RoundNotificationsSystem : EntitySystem
 
     private ISawmill _sawmill = default!;
     private readonly HttpClient _httpClient = new();
-    
     private string _webhookUrl = String.Empty;
     private string _roleId = String.Empty;
     private bool _roundStartOnly;
-    
     /// <inheritdoc/>
     public override void Initialize()
     {
@@ -45,14 +43,28 @@ public sealed class RoundNotificationsSystem : EntitySystem
 
         var payload = new WebhookPayload()
         {
-            Content = Loc.GetString("discord-round-new"),
+            Embeds = new()
+            {
+                new Embed()
+                {
+                    Color = 5131854,
+                    Title = Loc.GetString("discord-round-new")
+                }
+            }
         };
 
         if (!String.IsNullOrEmpty(_roleId))
         {
             payload = new WebhookPayload()
             {
-                Content = $"<@&{_roleId}> {Loc.GetString("discord-round-new")}",
+                Embeds = new()
+                {
+                    new Embed()
+                    {
+                        Color = 606060,
+                        Title = Loc.GetString("discord-round-new")
+                    }
+                },
                 AllowedMentions = new Dictionary<string, string[]>
                 {
                     { "roles", new []{ _roleId } }
@@ -73,11 +85,22 @@ public sealed class RoundNotificationsSystem : EntitySystem
         var text = Loc.GetString("discord-round-start",
             ("id", e.RoundId),
             ("map", mapName));
-        var payload = new WebhookPayload() { Content = text };
+        var title = Loc.GetString("discord-round-start-title");
+        var payload = new WebhookPayload()
+        {
+            Embeds = new()
+            {
+            new Embed(){
+                Color = 59647,
+                Title = title,
+                Description = text
+            }
+            }
+        };
 
         SendDiscordMessage(payload);
     }
-    
+
     private void OnRoundEnded(RoundEndedEvent e)
     {
         if (String.IsNullOrEmpty(_webhookUrl) || _roundStartOnly)
@@ -88,7 +111,18 @@ public sealed class RoundNotificationsSystem : EntitySystem
             ("hours", e.RoundDuration.Hours),
             ("minutes", e.RoundDuration.Minutes),
             ("seconds", e.RoundDuration.Seconds));
-        var payload = new WebhookPayload() { Content = text };
+        var title = Loc.GetString("discord-round-end-title");
+        var payload = new WebhookPayload()
+        {
+            Embeds = new()
+            {
+                new Embed(){
+                    Color = 16711680,
+                    Title = title,
+                    Description = text
+                }
+            }
+        };
 
         SendDiscordMessage(payload);
     }
@@ -105,12 +139,25 @@ public sealed class RoundNotificationsSystem : EntitySystem
             return;
         }
     }
+    private struct Embed
+    {
+        [JsonPropertyName("title")]
+        public string Title { get; set; } = "";
+        [JsonPropertyName("color")]
+        public int Color { get; set; } = 0;
+        [JsonPropertyName("description")]
+        public string Description { get; set; } = "";
+        public Embed()
+        {
 
+        }
+    }
     private struct WebhookPayload
     {
         [JsonPropertyName("content")]
         public string Content { get; set; } = "";
-
+        [JsonPropertyName("embeds")]
+        public List<Embed> Embeds { get; set; } = new();
         [JsonPropertyName("allowed_mentions")]
         public Dictionary<string, string[]> AllowedMentions { get; set; } =
             new()
@@ -120,6 +167,8 @@ public sealed class RoundNotificationsSystem : EntitySystem
 
         public WebhookPayload()
         {
+
         }
+
     }
 }
