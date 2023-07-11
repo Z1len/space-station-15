@@ -1,0 +1,19 @@
+- type: document
+  id: StationTargetStatusReport
+  name: stationTargetStatusReport-title
+  text: stationTargetStatusReport-text
+
+- type: document
+  id: ERTCallRequest
+  name: ERTCallRequest-title
+  text: ERTCallRequest-text
+
+- type: document
+  id: EmployeeTerminationLetter
+  name: employeeTerminationLetter-title
+  text: employeeTerminationLetter-text
+
+- type: document
+  id: JobApplication
+  name: jobApplication-title
+  text: jobApplication-text

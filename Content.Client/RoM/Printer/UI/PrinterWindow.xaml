@@ -1,0 +1,19 @@
+<DefaultWindow xmlns="https://spacestation14.io"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               Title="{ Loc printer-ui-title }"
+               MinWidth="200"
+               MinHeight="300"
+               >
+    <BoxContainer Orientation="Vertical" VerticalExpand="True" SeparationOverride="4" MinWidth="150">
+        <BoxContainer Orientation="Horizontal">
+            <Label Text="{ Loc printer-ui-label-status }"/>
+            <Control MinWidth="4"/>
+            <Label Name="PaperStatus"></Label>
+        </BoxContainer>
+        <Control MinHeight="10"/>
+        <ItemList Name="DocList" MinWidth="150" VerticalExpand="True"/>
+        <Control MinWidth="4"/>
+        <Button Name="PrintButton" Margin="4" Text="{ Loc printer-ui-button-print }"/>
+	</BoxContainer>
+
+</DefaultWindow>

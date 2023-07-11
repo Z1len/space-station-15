@@ -1,0 +1,60 @@
+- type: entity
+  parent: BaseMachinePowered
+  id: PrinterMachine
+  name: Document Printer
+  description: A NanoTrasen document printer
+  components:
+    - type: Sprite
+      sprite: Structures/Machines/fax_machine.rsi
+      drawdepth: SmallObjects
+      layers:
+        - state: icon
+          map: [ "base" ]
+          color: "#d5db12"
+    - type: Icon
+      sprite: Structures/Machines/fax_machine.rsi
+      state: icon
+    - type: Appearance
+    - type: Physics
+      bodyType: Static
+    - type: Printer
+      paperSlot:
+        insertSound: /Audio/Machines/scanning.ogg
+        ejectSound: /Audio/Machines/tray_eject.ogg
+        whitelist:
+          components:
+            - Paper
+    - type: ItemSlots
+    - type: ContainerContainer
+      containers:
+        Paper: !type:ContainerSlot
+    - type: Fixtures
+      fixtures:
+        fix1:
+          shape:
+            !type:PhysShapeAabb
+            bounds: "-0.25,-0.25,0.25,0.25"
+          density: 25
+          mask:
+            - TabletopMachineMask
+          layer:
+            - TabletopMachineLayer
+    - type: ApcPowerReceiver
+      powerLoad: 250
+    - type: ActivatableUI
+      key: enum.PrinterUI.Key
+    - type: ActivatableUIRequiresPower
+    - type: UserInterface
+      interfaces:
+        - key: enum.PrinterUI.Key
+          type: PrinterBoundUI
+    - type: GenericVisualizer
+      visuals:
+        enum.PowerDeviceVisuals.Powered:
+          base:
+            True: { state: idle }
+            False: { state: icon }
+        enum.PrinterVisuals.VisualState:
+          base:
+            Inserting: { state: inserting }
+            Printing: { state: printing }
