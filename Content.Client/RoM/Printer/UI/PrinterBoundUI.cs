@@ -30,7 +30,6 @@ public sealed class PrinterBoundUI : BoundUserInterface
     }
 
     private void Print()
-
     {
         SendMessage(new PrintingMessage());
     }
