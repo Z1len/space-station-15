@@ -9,7 +9,7 @@ public sealed class PrinterBoundUI : BoundUserInterface
 {
     private PrinterWindow? _printerWindow;
 
-    public PrinterBoundUI(ClientUserInterfaceComponent owner, Enum uiKey) : base(owner, uiKey)
+    public PrinterBoundUI(EntityUid owner, Enum uiKey) : base(owner, uiKey)
     {
     }
 
