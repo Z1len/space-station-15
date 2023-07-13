@@ -23,7 +23,7 @@ public sealed class PrinterSystem : EntitySystem
     [Dependency] private readonly AppearanceSystem _appearance = default!;
 
     private string _documentText = "";
-    private const string PaperSlotId = "Paper";
+    private const string PaperSlotId = "PrinterPaperSlot";
 
     public override void Initialize()
     {
@@ -118,11 +118,11 @@ public sealed class PrinterSystem : EntitySystem
     private void OnPrintingRequest(EntityUid uid, PrinterComponent component, PrintingMessage args)
     {
         if (HasComp<PaperComponent>(component.PaperSlot.Item) || component.PaperSlot.HasItem)
-	{
-	    _soundSystem.PlayPvs(component.PrintSound, uid);
+        {
+            _soundSystem.PlayPvs(component.PrintSound, uid);
             _popupSystem.PopupEntity(Loc.GetString("printer-popup-printing"), uid);
             component.PrintingTimeRemaining = component.PrintingTime;
-	}
+	    }
     }
 
     private void ProcessInsertingAnimation(EntityUid uid, float frameTime, PrinterComponent component)
