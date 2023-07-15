@@ -1,19 +1,19 @@
 - type: document
   id: StationTargetStatusReport
-  name: stationTargetStatusReport-title
-  text: stationTargetStatusReport-text
+  name: doc-station-target-status-report-title
+  text: doc-station-target-status-report-text
 
 - type: document
   id: ERTCallRequest
-  name: ERTCallRequest-title
-  text: ERTCallRequest-text
+  name: doc-ert-call-request-title
+  text: doc-ert-call-request-text
 
 - type: document
   id: EmployeeTerminationLetter
-  name: employeeTerminationLetter-title
-  text: employeeTerminationLetter-text
+  name: doc-job-application-title
+  text: doc-job-application-text
 
 - type: document
   id: JobApplication
-  name: jobApplication-title
-  text: jobApplication-text
+  name: doc-employee-termination-letter-title
+  text: doc-employee-termination-letter-text

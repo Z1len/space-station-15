@@ -19,6 +19,10 @@ public sealed class PrinterComponent : Component
     public SoundSpecifier PrintSound = new SoundPathSpecifier("/Audio/Machines/printer.ogg");
 
     [ViewVariables]
+    [DataField("DocumentText")]
+    public string? DocumentText;
+
+    [ViewVariables]
     public float InsertionTime = 1.88f;
 
     [ViewVariables]

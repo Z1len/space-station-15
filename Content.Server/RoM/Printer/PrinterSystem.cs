@@ -22,7 +22,7 @@ public sealed class PrinterSystem : EntitySystem
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly AppearanceSystem _appearance = default!;
 
-    private string _documentText = "";
+
     private const string PaperSlotId = "PrinterPaperSlot";
 
     public override void Initialize()
@@ -85,7 +85,6 @@ public sealed class PrinterSystem : EntitySystem
             return;
 
         if (args.Container.ID != component.PaperSlot.ID)
-
             return;
 
         component.InsertionTimeRemaining = component.InsertionTime;
@@ -102,7 +101,7 @@ public sealed class PrinterSystem : EntitySystem
 
     private void OnGetData(EntityUid uid, PrinterComponent component, GetDataMessage args)
     {
-        _documentText = Loc.GetString(_prototype.Index<DocumentPrototype>(args.Id).Text);
+        component.DocumentText = Loc.GetString(_prototype.Index<DocumentPrototype>(args.Id).Text);
     }
 
     private void OnComponentRemove(EntityUid uid, PrinterComponent component, ComponentRemove args)
@@ -167,9 +166,14 @@ public sealed class PrinterSystem : EntitySystem
             _appearance.SetData(uid, PrinterVisuals.VisualState, PrinterVisualState.Normal);
     }
 
-
-    private void PrintDocument(EntityUid uid, PrinterComponent component)
+    /// <summary>
+    /// Checks if paper inserted in item slot and prints document text from component
+    /// </summary>
+    public void PrintDocument(EntityUid uid, PrinterComponent? component = null)
     {
+        if(!Resolve(uid, ref component))
+            return;
+
         var hasItem = component.PaperSlot.HasItem;
         var insertedPaper = component.PaperSlot.Item;
 
@@ -180,7 +184,7 @@ public sealed class PrinterSystem : EntitySystem
         var paper = _entityManager.SpawnEntity("Paper", Transform(uid).Coordinates);
         if (HasComp<PaperComponent>(paper))
         {
-            _paperSystem.SetContent(paper, _documentText);
+            _paperSystem.SetContent(paper, component.DocumentText ?? " ");
         }
 
         UpdateUi(uid, component);
