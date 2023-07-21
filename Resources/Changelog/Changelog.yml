@@ -2767,18 +2767,6 @@ Entries:
   - {message: Added nukie guidebook, type: Add}
   id: 4217
   time: '2023-07-10T02:54:43.0000000+00:00'
-<<<<<<< HEAD
-- author: Remaster
-  changes:
-    - {message: 'Добавлен принтер документов', type: Add}
-  id: 4218
-  time: '2023-07-11T02:54:43.0000000+00:00'
-- author: Remaster
-  changes:
-    - {message: 'Добавлен оверлей для медицинского худа', type: Add}
-  id: 4219
-  time: '2023-07-21T02:54:43.0000000+00:00'
-=======
 - author: Myakot
   changes:
   - {message: Removed a part of bicaridine's description that talked about non-existent
@@ -2979,13 +2967,4 @@ Entries:
       the uplink.', type: Add}
   id: 4250
   time: '2023-07-14T04:48:59.0000000+00:00'
-- author: Remaster
-  changes:
-    - {message: 'Добавлен принтер документов', type: Add}
-  id: 4250
-  time: '2023-07-21T02:54:43.0000000+00:00'
--  author: Remaster
-  changes:
-    - {message: 'Добавлен оверлей для медицинского худа', type: Add}
-  id: 4251
-  time: '2023-07-21T02:54:43.0000000+00:00'
+
