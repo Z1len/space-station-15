@@ -2,7 +2,9 @@ using Content.Server.Paper;
 using Content.Server.Popups;
 using Content.Server.Power.Components;
 using Content.Server.UserInterface;
+using Content.Shared.Administration.Logs;
 using Content.Shared.Containers.ItemSlots;
+using Content.Shared.Database;
 using Content.Shared.RoM.Printer;
 using Content.Shared.RoM.Printer.Prototypes;
 using Robust.Server.GameObjects;
@@ -21,6 +23,7 @@ public sealed class PrinterSystem : EntitySystem
     [Dependency] private readonly SharedAudioSystem _soundSystem = default!;
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly AppearanceSystem _appearance = default!;
+    [Dependency] private readonly ISharedAdminLogManager _adminLog = default!;
 
 
     private const string PaperSlotId = "PrinterPaperSlot";
@@ -118,8 +121,12 @@ public sealed class PrinterSystem : EntitySystem
     {
         if (HasComp<PaperComponent>(component.PaperSlot.Item) || component.PaperSlot.HasItem)
         {
+            var attachedEnt = args.Session.AttachedEntity;
             _soundSystem.PlayPvs(component.PrintSound, uid);
             _popupSystem.PopupEntity(Loc.GetString("printer-popup-printing"), uid);
+            _adminLog.Add(LogType.Action,
+                LogImpact.Low,
+                $"{(attachedEnt != null ? ToPrettyString(attachedEnt.Value) : "Unknown"):user} has printed on {ToPrettyString(uid)}: {component.DocumentText ?? " "}");
             component.PrintingTimeRemaining = component.PrintingTime;
 	    }
     }
