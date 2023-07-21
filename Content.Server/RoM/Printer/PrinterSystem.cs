@@ -25,7 +25,7 @@ public sealed class PrinterSystem : EntitySystem
     [Dependency] private readonly ISharedAdminLogManager _adminLog = default!;
 
 
-    private const string PaperSlotId = "PrinterPaperSlot";
+    private const string PaperSlotId = "PaperSlot";
 
     public override void Initialize()
     {

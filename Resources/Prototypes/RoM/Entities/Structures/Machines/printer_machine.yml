@@ -25,7 +25,7 @@
     - type: ItemSlots
     - type: ContainerContainer
       containers:
-        Paper: !type:ContainerSlot
+        PaperSlot: !type:ContainerSlot
     - type: Fixtures
       fixtures:
         fix1:
