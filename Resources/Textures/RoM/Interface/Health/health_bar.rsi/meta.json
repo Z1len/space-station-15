@@ -1,11 +1,11 @@
 {
     "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Create by Remaster",
     "size": {
         "x": 22,
         "y": 3
     },
-    "license": "CC-BY-SA-3.0",
-    "copyright": "Create by Remaster",
     "states": [
         {
             "name": "icon"
