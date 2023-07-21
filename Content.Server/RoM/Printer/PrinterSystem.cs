@@ -22,7 +22,6 @@ public sealed class PrinterSystem : EntitySystem
     [Dependency] private readonly UserInterfaceSystem _userInterface = default!;
     [Dependency] private readonly SharedAudioSystem _soundSystem = default!;
     [Dependency] private readonly IPrototypeManager _prototype = default!;
-    [Dependency] private readonly AppearanceSystem _appearance = default!;
     [Dependency] private readonly ISharedAdminLogManager _adminLog = default!;
 
 
@@ -50,8 +49,8 @@ public sealed class PrinterSystem : EntitySystem
             if (!powerComp.Powered)
                 return;
 
-            ProcessInsertingAnimation(uid, frameTime, printerComp);
-            ProcessPrintingAnimation(uid, frameTime, printerComp);
+            InsertingProcess(uid, frameTime, printerComp);
+            PrintingProcess(uid, frameTime, printerComp);
         }
     }
 
@@ -76,8 +75,7 @@ public sealed class PrinterSystem : EntitySystem
             component.PrintingTimeRemaining = 0f;
         }
 
-        if (isPrintInterrupted || isInsertInterrupted)
-            UpdateAppearance(uid, component);
+
 
         _itemSlotsSystem.SetLock(uid, component.PaperSlot, !args.Powered);
     }
@@ -131,47 +129,35 @@ public sealed class PrinterSystem : EntitySystem
 	    }
     }
 
-    private void ProcessInsertingAnimation(EntityUid uid, float frameTime, PrinterComponent component)
+    private void InsertingProcess(EntityUid uid, float frameTime, PrinterComponent component)
     {
         if (component.InsertionTimeRemaining <= 0)
             return;
 
         component.InsertionTimeRemaining -= frameTime;
-        UpdateAppearance(uid, component);
-        var isAnimationEnd = component.InsertionTimeRemaining <= 0;
-        if (isAnimationEnd)
+
+        var isInsertingTimeEnded = component.InsertionTimeRemaining <= 0;
+        if (isInsertingTimeEnded)
         {
             _itemSlotsSystem.SetLock(uid, component.PaperSlot, false);
             UpdateUi(uid, component);
         }
     }
 
-    private void ProcessPrintingAnimation(EntityUid uid, float frameTime, PrinterComponent component)
+    private void PrintingProcess(EntityUid uid, float frameTime, PrinterComponent component)
     {
         if (component.PrintingTimeRemaining <= 0)
             return;
 
         component.PrintingTimeRemaining -= frameTime;
-        UpdateAppearance(uid, component);
-        var isAnimationEnd = component.PrintingTimeRemaining <= 0;
-        if (isAnimationEnd)
+
+        var isPrintingTimeEnded = component.PrintingTimeRemaining <= 0;
+        if (isPrintingTimeEnded)
         {
             PrintDocument(uid, component);
         }
     }
 
-    private void UpdateAppearance(EntityUid uid, PrinterComponent? component = null)
-    {
-        if (!Resolve(uid, ref component))
-            return;
-
-        if (component.InsertionTimeRemaining > 0)
-            _appearance.SetData(uid, PrinterVisuals.VisualState, PrinterVisualState.Inserting);
-        else if (component.PrintingTimeRemaining > 0)
-            _appearance.SetData(uid, PrinterVisuals.VisualState, PrinterVisualState.Printing);
-        else
-            _appearance.SetData(uid, PrinterVisuals.VisualState, PrinterVisualState.Normal);
-    }
 
     /// <summary>
     /// Checks if paper inserted in item slot and prints document text from component

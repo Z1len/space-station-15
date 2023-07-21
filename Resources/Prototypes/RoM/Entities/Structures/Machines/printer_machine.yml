@@ -5,16 +5,14 @@
   description: A NanoTrasen document printer
   components:
     - type: Sprite
-      sprite: Structures/Machines/fax_machine.rsi
+      sprite: RoM/Structures/printer_machine.rsi
       drawdepth: SmallObjects
       layers:
         - state: icon
           map: [ "base" ]
-          color: "#d5db12"
     - type: Icon
-      sprite: Structures/Machines/fax_machine.rsi
+      sprite: RoM/Structures/printer_machine.rsi
       state: icon
-    - type: Appearance
     - type: Physics
       bodyType: Static
     - type: Printer
@@ -48,13 +46,3 @@
       interfaces:
         - key: enum.PrinterUI.Key
           type: PrinterBoundUI
-    - type: GenericVisualizer
-      visuals:
-        enum.PowerDeviceVisuals.Powered:
-          base:
-            True: { state: idle }
-            False: { state: icon }
-        enum.PrinterVisuals.VisualState:
-          base:
-            Inserting: { state: inserting }
-            Printing: { state: printing }
