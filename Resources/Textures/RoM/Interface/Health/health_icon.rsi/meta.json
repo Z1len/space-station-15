@@ -1,0 +1,20 @@
+{
+    "version": 1,
+    "license": "GPLv3",
+    "copyright": "Taken from https://github.com/tgstation/tgstation/blob/master/icons/mob/huds/hud.dmi",
+    "size": {
+        "x": 8,
+        "y": 8
+    },
+    "states": [
+        {
+            "name": "alive"
+        },
+        {
+            "name": "critical"
+        },
+        {
+            "name": "dead"
+        }
+    ]
+}

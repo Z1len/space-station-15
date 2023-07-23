@@ -49,9 +49,11 @@ public sealed class MedicalHudOverlay : Overlay
         var rotationMatrix = Matrix3.CreateRotation(-rotation);
         var bound = args.WorldAABB.Enlarged(5f);
 
+        var offset = 0f;
+
         handle.UseShader(_shader);
 
-        var enumerator = _entityManager.EntityQueryEnumerator<TransformComponent, SpriteComponent, DamageableComponent, MobStateComponent >();
+        var enumerator = _entityManager.EntityQueryEnumerator<TransformComponent, SpriteComponent, DamageableComponent, MobStateComponent>();
 
         while (enumerator.MoveNext(out var xform, out var sprite, out var damage, out var state))
         {
@@ -68,16 +70,24 @@ public sealed class MedicalHudOverlay : Overlay
             Matrix3.Multiply(rotationMatrix, scaledWorld, out var matty);
             handle.SetTransform(matty);
 
-
             var yOffset = sprite.Bounds.Height / 2f + 0.05f;
 
+            var yOffsetIcon = yOffset - 0.14f;
+
             var position = new Vector2(-_texture.Width / 2f / EyeManager.PixelsPerMeter,
-                yOffset / scale + 0f / EyeManager.PixelsPerMeter * scale);
-            handle.DrawTexture(_texture, position);
+                yOffset / scale + offset / EyeManager.PixelsPerMeter * scale);
+
+            var iconPos = new Vector2(_texture.Width / 1.7f / EyeManager.PixelsPerMeter,
+                yOffsetIcon / scale + offset / EyeManager.PixelsPerMeter * scale);
 
             var mobState = state.CurrentState;
             var totalDamage = damage.TotalDamage;
             var color = GetColor(mobState);
+
+            var textureIcon = _entityManager.EntitySysManager.GetEntitySystem<SpriteSystem>().Frame0(GetHealthIconRsi(mobState));
+
+            handle.DrawTexture(_texture, position);
+            handle.DrawTexture(textureIcon, iconPos);
 
             var xProgress = (EndX - StartX) * (1f - totalDamage.Float()/100f) + StartX;
 
@@ -94,6 +104,19 @@ public sealed class MedicalHudOverlay : Overlay
         }
         handle.UseShader(null);
         handle.SetTransform(Matrix3.Identity);
+    }
+
+    private static SpriteSpecifier.Rsi GetHealthIconRsi(MobState state)
+    {
+        switch (state)
+        {
+            case MobState.Alive:
+                return new SpriteSpecifier.Rsi(new("/Textures/RoM/Interface/Health/health_icon.rsi"), "alive");
+            case MobState.Critical:
+                return new SpriteSpecifier.Rsi(new("/Textures/RoM/Interface/Health/health_icon.rsi"), "critical");
+            default:
+                return new SpriteSpecifier.Rsi(new("/Textures/RoM/Interface/Health/health_icon.rsi"), "dead");
+        }
     }
     private static Color GetColor(MobState state)
     {
