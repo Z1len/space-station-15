@@ -15,21 +15,20 @@ namespace Content.Client.RoM.MedicalHud;
 [UsedImplicitly]
 public sealed class MedicalHudOverlay : Overlay
 {
-    private readonly IEntityManager _entityManager;
-    private readonly Texture _texture;
-    private readonly SharedTransformSystem _transform;
-    private readonly ShaderInstance _shader;
-    private readonly IPlayerManager _player;
+    [Dependency] private readonly IEntityManager _entityManager = default!;
+    [Dependency] private readonly IPlayerManager _player = default!;
+
     private const float StartX = 1;
     private const float EndX = 21f;
-
+    private readonly ShaderInstance _shader;
+    private readonly Texture _texture;
+    private readonly SharedTransformSystem _transform;
     public override OverlaySpace Space => OverlaySpace.WorldSpaceBelowFOV;
 
-    public MedicalHudOverlay(IEntityManager entityManager, IPrototypeManager protoManager, IPlayerManager player)
+    public MedicalHudOverlay(IPrototypeManager protoManager)
     {
-        _player = player;
-        _entityManager = entityManager;
-        _transform = entityManager.EntitySysManager.GetEntitySystem<SharedTransformSystem>();
+        IoCManager.InjectDependencies(this);
+        _transform = _entityManager.EntitySysManager.GetEntitySystem<SharedTransformSystem>();
         var sprite = new SpriteSpecifier.Rsi(new ("/Textures/RoM/Interface/Health/health_bar.rsi"), "icon");
         _texture = _entityManager.EntitySysManager.GetEntitySystem<SpriteSystem>().Frame0(sprite);
         _shader = protoManager.Index<ShaderPrototype>("unshaded").Instance();

@@ -8,17 +8,16 @@ using Robust.Shared.Prototypes;
 namespace Content.Client.RoM.MedicalHud;
 
 [UsedImplicitly]
-public sealed class MedicalHudSystem : SharedMedicalHudSystem
+public sealed class MedicalHudSystem : EntitySystem
 {
     [Dependency] private readonly IOverlayManager _overlayManager = default!;
-    [Dependency] private readonly IEntityManager _entityManager = default!;
     [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
-    [Dependency] private readonly IPlayerManager _player = default!;
 
     public override void Initialize()
     {
         base.Initialize();
-        _overlayManager.AddOverlay(new MedicalHudOverlay(_entityManager, _prototypeManager, _player));
+        _overlayManager.AddOverlay(new MedicalHudOverlay(_prototypeManager));
+
     }
 
     public override void Shutdown()

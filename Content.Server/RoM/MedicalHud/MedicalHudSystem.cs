@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace Content.Server.RoM.MedicalHud;
 
 [UsedImplicitly]
-public sealed class MedicalHudSystem : SharedMedicalHudSystem
+public sealed class MedicalHudSystem : EntitySystem
 {
     [Dependency] private readonly EntityManager _entityManager = default!;
     public override void Initialize()
