@@ -2,32 +2,28 @@ using System.Numerics;
 using Content.Shared.Damage;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
-using Content.Shared.RoM.MedicalHud;
-using JetBrains.Annotations;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
-using Robust.Client.Player;
 using Robust.Shared.Enums;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
 namespace Content.Client.RoM.MedicalHud;
-[UsedImplicitly]
+
 public sealed class MedicalHudOverlay : Overlay
 {
-    [Dependency] private readonly IEntityManager _entityManager = default!;
-    [Dependency] private readonly IPlayerManager _player = default!;
-
     private const float StartX = 1;
     private const float EndX = 21f;
     private readonly ShaderInstance _shader;
     private readonly Texture _texture;
     private readonly SharedTransformSystem _transform;
+    private readonly IEntityManager _entityManager;
+
     public override OverlaySpace Space => OverlaySpace.WorldSpaceBelowFOV;
 
-    public MedicalHudOverlay(IPrototypeManager protoManager)
+    public MedicalHudOverlay(IEntityManager entManager,IPrototypeManager protoManager)
     {
-        IoCManager.InjectDependencies(this);
+        _entityManager = entManager;
         _transform = _entityManager.EntitySysManager.GetEntitySystem<SharedTransformSystem>();
         var sprite = new SpriteSpecifier.Rsi(new ("/Textures/RoM/Interface/Health/health_bar.rsi"), "icon");
         _texture = _entityManager.EntitySysManager.GetEntitySystem<SpriteSystem>().Frame0(sprite);
@@ -36,33 +32,25 @@ public sealed class MedicalHudOverlay : Overlay
 
     protected override void Draw(in OverlayDrawArgs args)
     {
-        var owner = _player.LocalPlayer?.ControlledEntity;
-        if(!_entityManager.HasComponent<MedicalHudComponent>(owner))
-            return;
-
         var handle = args.WorldHandle;
         var rotation = args.Viewport.Eye?.Rotation ?? Angle.Zero;
         var xformQuery = _entityManager.GetEntityQuery<TransformComponent>();
         const float scale = 1f;
         var scaleMatrix = Matrix3.CreateScale(new Vector2(scale, scale));
         var rotationMatrix = Matrix3.CreateRotation(-rotation);
-        var bound = args.WorldAABB.Enlarged(5f);
 
         var offset = 0f;
 
         handle.UseShader(_shader);
 
-        var enumerator = _entityManager.EntityQueryEnumerator<TransformComponent, SpriteComponent, DamageableComponent, MobStateComponent>();
-
+        var enumerator = _entityManager
+            .AllEntityQueryEnumerator<TransformComponent, SpriteComponent, DamageableComponent, MobStateComponent>();
         while (enumerator.MoveNext(out var xform, out var sprite, out var damage, out var state))
         {
-
             if(xform.MapID != args.MapId)
                 continue;
 
             var worldPos = _transform.GetWorldPosition(xform, xformQuery);
-            if(!bound.Contains(worldPos))
-                continue;
 
             var worldMatrix = Matrix3.CreateTranslation(worldPos);
             Matrix3.Multiply(scaleMatrix, worldMatrix, out var scaledWorld);
