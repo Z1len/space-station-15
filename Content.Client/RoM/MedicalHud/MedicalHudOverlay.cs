@@ -44,7 +44,7 @@ public sealed class MedicalHudOverlay : Overlay
         handle.UseShader(_shader);
 
         var enumerator = _entityManager
-            .EntityQueryEnumerator<TransformComponent, SpriteComponent, DamageableComponent, MobStateComponent>();
+            .AllEntityQueryEnumerator<TransformComponent, SpriteComponent, DamageableComponent, MobStateComponent>();
         while (enumerator.MoveNext(out var xform, out var sprite, out var damage, out var state))
         {
             if (xform.MapID != args.MapId)
