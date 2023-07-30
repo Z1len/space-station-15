@@ -1,9 +1,6 @@
-using Robust.Shared.GameStates;
-
 namespace Content.Shared.RoM.MedicalHud;
-[RegisterComponent, NetworkedComponent]
+
+[RegisterComponent]
 public sealed class MedicalHudComponent : Component
 {
-
 }
-

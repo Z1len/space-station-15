@@ -21,11 +21,11 @@ public sealed class MedicalHudOverlay : Overlay
 
     public override OverlaySpace Space => OverlaySpace.WorldSpaceBelowFOV;
 
-    public MedicalHudOverlay(IEntityManager entManager,IPrototypeManager protoManager)
+    public MedicalHudOverlay(IEntityManager entManager, IPrototypeManager protoManager)
     {
         _entityManager = entManager;
         _transform = _entityManager.EntitySysManager.GetEntitySystem<SharedTransformSystem>();
-        var sprite = new SpriteSpecifier.Rsi(new ("/Textures/RoM/Interface/Health/health_bar.rsi"), "icon");
+        var sprite = new SpriteSpecifier.Rsi(new("/Textures/RoM/Interface/Health/health_bar.rsi"), "icon");
         _texture = _entityManager.EntitySysManager.GetEntitySystem<SpriteSystem>().Frame0(sprite);
         _shader = protoManager.Index<ShaderPrototype>("unshaded").Instance();
     }
@@ -44,10 +44,10 @@ public sealed class MedicalHudOverlay : Overlay
         handle.UseShader(_shader);
 
         var enumerator = _entityManager
-            .AllEntityQueryEnumerator<TransformComponent, SpriteComponent, DamageableComponent, MobStateComponent>();
+            .EntityQueryEnumerator<TransformComponent, SpriteComponent, DamageableComponent, MobStateComponent>();
         while (enumerator.MoveNext(out var xform, out var sprite, out var damage, out var state))
         {
-            if(xform.MapID != args.MapId)
+            if (xform.MapID != args.MapId)
                 continue;
 
             var worldPos = _transform.GetWorldPosition(xform, xformQuery);
@@ -71,24 +71,25 @@ public sealed class MedicalHudOverlay : Overlay
             var totalDamage = damage.TotalDamage;
             var color = GetColor(mobState);
 
-            var textureIcon = _entityManager.EntitySysManager.GetEntitySystem<SpriteSystem>().Frame0(GetHealthIconRsi(mobState));
+            var textureIcon = _entityManager.EntitySysManager.GetEntitySystem<SpriteSystem>()
+                .Frame0(GetHealthIconRsi(mobState));
 
             handle.DrawTexture(_texture, position);
             handle.DrawTexture(textureIcon, iconPos);
 
-            var xProgress = (EndX - StartX) * (1f - totalDamage.Float()/100f) + StartX;
+            var xProgress = (EndX - StartX) * (1f - totalDamage.Float() / 100f) + StartX;
 
-            if(mobState == MobState.Critical)
-                xProgress = (EndX - StartX) * (2f - totalDamage.Float()/100f) + StartX;
+            if (mobState == MobState.Critical)
+                xProgress = (EndX - StartX) * (2f - totalDamage.Float() / 100f) + StartX;
             if (mobState == MobState.Dead)
                 continue;
 
             var box = new Box2(new Vector2(StartX, 1f) / EyeManager.PixelsPerMeter,
                 new Vector2(xProgress, 2f) / EyeManager.PixelsPerMeter);
             box = box.Translated(position);
-            handle.DrawRect(box,color);
-
+            handle.DrawRect(box, color);
         }
+
         handle.UseShader(null);
         handle.SetTransform(Matrix3.Identity);
     }
@@ -105,11 +106,11 @@ public sealed class MedicalHudOverlay : Overlay
                 return new SpriteSpecifier.Rsi(new("/Textures/RoM/Interface/Health/health_icon.rsi"), "dead");
         }
     }
+
     private static Color GetColor(MobState state)
     {
-        if(state == MobState.Alive)
+        if (state == MobState.Alive)
             return new Color(0f, 5f, 0f);
         return new Color(5f, 0f, 0f);
     }
-
 }

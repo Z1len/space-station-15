@@ -7,8 +7,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Client.RoM.MedicalHud;
 
-
-public sealed class MedicalHudSystem : SharedMedicalHudSystem
+public sealed class MedicalHudSystem : EntitySystem
 {
     [Dependency] private readonly IOverlayManager _overlayManager = default!;
     [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
@@ -31,7 +30,7 @@ public sealed class MedicalHudSystem : SharedMedicalHudSystem
 
     private void OnAttached(EntityUid uid, MedicalHudComponent component, PlayerAttachedEvent args)
     {
-        _overlayManager.AddOverlay(new MedicalHudOverlay(EntityManager,_prototypeManager));
+        _overlayManager.AddOverlay(new MedicalHudOverlay(EntityManager, _prototypeManager));
     }
 
     private void OnDetached(EntityUid uid, MedicalHudComponent component, PlayerDetachedEvent args)
@@ -41,13 +40,13 @@ public sealed class MedicalHudSystem : SharedMedicalHudSystem
 
     private void OnInit(EntityUid uid, MedicalHudComponent component, ComponentInit args)
     {
-        if(_playerManager.LocalPlayer?.ControlledEntity == uid)
-            _overlayManager.AddOverlay(new MedicalHudOverlay(EntityManager,_prototypeManager));
+        if (_playerManager.LocalPlayer?.ControlledEntity == uid)
+            _overlayManager.AddOverlay(new MedicalHudOverlay(EntityManager, _prototypeManager));
     }
 
     private void OnRemove(EntityUid uid, MedicalHudComponent component, ComponentRemove args)
     {
-        if(_playerManager.LocalPlayer?.ControlledEntity == uid)
+        if (_playerManager.LocalPlayer?.ControlledEntity == uid)
             _overlayManager.RemoveOverlay<MedicalHudOverlay>();
     }
 }

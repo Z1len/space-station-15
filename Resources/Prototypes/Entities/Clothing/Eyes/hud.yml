@@ -15,7 +15,9 @@
   name: medical hud
   description: A heads-up display that scans the humanoids in view and provides accurate data about their health status.
   components:
-  - type: MedicalHud
+  - type: GlassesHud
+    component:
+      - type: MedicalHud
   - type: Sprite
     sprite: Clothing/Eyes/Hud/med.rsi
   - type: Clothing
