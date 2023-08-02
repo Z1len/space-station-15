@@ -90,7 +90,8 @@ public sealed class RoundNotificationsSystem : EntitySystem
         {
             Embeds = new()
             {
-            new Embed(){
+            new Embed()
+            {
                 Color = 59647,
                 Title = title,
                 Description = text
