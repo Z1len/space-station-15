@@ -1,6 +1,6 @@
 namespace Content.Shared.RoM.MedicalHud;
 
 [RegisterComponent]
-public sealed class MedicalHudComponent : Component
+public sealed partial class MedicalHudComponent : Component
 {
 }

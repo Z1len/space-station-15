@@ -4,7 +4,7 @@ using Robust.Shared.Audio;
 namespace Content.Server.RoM.Printer;
 
 [RegisterComponent]
-public sealed class PrinterComponent : Component
+public sealed partial class PrinterComponent : Component
 {
     [DataField("paperSlot", required: true)]
     public ItemSlot PaperSlot = new();
