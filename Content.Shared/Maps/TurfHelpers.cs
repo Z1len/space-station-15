@@ -42,7 +42,7 @@ namespace Content.Shared.Maps
 
             mapManager ??= IoCManager.Resolve<IMapManager>();
             var pos = coordinates.ToMap(entityManager, entityManager.System<SharedTransformSystem>());
-            if (!mapManager.TryFindGridAt(pos, out var grid))
+            if (!mapManager.TryFindGridAt(pos, out _, out var grid))
                 return null;
 
             if (!grid.TryGetTileRef(coordinates, out var tile))
@@ -87,6 +87,30 @@ namespace Content.Shared.Maps
         public static bool IsSpace(this TileRef tile, ITileDefinitionManager? tileDefinitionManager = null)
         {
             return tile.Tile.IsSpace(tileDefinitionManager);
+        }
+
+        /// <summary>
+        ///     Returns a weighted pick of a tile variant.
+        /// </summary>
+        public static byte PickVariant(this ContentTileDefinition tile, IRobustRandom? random = null)
+        {
+            IoCManager.Resolve(ref random);
+            var variants = tile.PlacementVariants;
+
+            var sum = variants.Sum();
+            var accumulated = 0f;
+            var rand = random.NextFloat() * sum;
+
+            for (byte i = 0; i < variants.Length; ++i)
+            {
+                accumulated += variants[i];
+
+                if (accumulated >= rand)
+                    return i;
+            }
+
+            // Shouldn't happen
+            throw new InvalidOperationException($"Invalid weighted variantize tile pick for {tile.ID}!");
         }
 
         /// <summary>
@@ -138,13 +162,6 @@ namespace Content.Shared.Maps
                 : CollisionGroup.Impassable;
 
             return IoCManager.Resolve<IEntitySystemManager>().GetEntitySystem<TurfSystem>().IsTileBlocked(turf, mask);
-        }
-
-        public static EntityCoordinates GridPosition(this TileRef turf, IMapManager? mapManager = null)
-        {
-            mapManager ??= IoCManager.Resolve<IMapManager>();
-
-            return turf.GridIndices.ToEntityCoordinates(turf.GridUid, mapManager);
         }
 
         /// <summary>

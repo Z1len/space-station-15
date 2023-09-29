@@ -11,12 +11,13 @@
   - type: InputMover
   - type: MobMover
   - type: HTN
-    rootTask: SimpleHostileCompound
+    rootTask:
+      task: SimpleHostileCompound
   - type: Reactive
     groups:
       Flammable: [Touch]
       Extinguish: [Touch]
-  - type: Faction
+  - type: NpcFactionMember
     factions:
     - SimpleHostile
   - type: Sprite
@@ -42,7 +43,6 @@
   - type: MobThresholds
     thresholds:
       0: Alive
-      150: Critical
       200: Dead
   - type: MeleeWeapon
     hidden: true
@@ -73,14 +73,11 @@
       Parched: 150
       Dead: 0
     baseDecayRate: 0.1
-  - type: Appearance
   - type: DamageStateVisuals
     rotate: true
     states:
       Alive:
         Base: regalrat
-      Critical:
-        Base: dead
       Dead:
         Base: dead
   - type: GhostRole
@@ -96,23 +93,11 @@
       - FootstepSound
   - type: NoSlip
   - type: RatKing
-    actionRaiseArmy:
-      useDelay: 4
-      icon: Interface/Actions/ratKingArmy.png
-      name: rat-king-raise-army-name
-      description: rat-king-raise-army-description
-      itemIconStyle: NoItem
-      event: !type:RatKingRaiseArmyActionEvent
     hungerPerArmyUse: 25
-    actionDomain:
-      useDelay: 10
-      icon: Interface/Actions/ratKingDomain.png
-      name: rat-king-domain-name
-      description: rat-king-domain-description
-      itemIconStyle: NoItem
-      event: !type:RatKingDomainActionEvent
     hungerPerDomainUse: 50
   - type: MobsterAccent
+  - type: Speech
+    speechVerb: SmallMob
   - type: Butcherable
     spawned:
     - id: ClothingHeadHatFancyCrown #how did that get there?
@@ -123,6 +108,9 @@
     nameSegments:
     - RegalRatNameKingdom
     - RegalRatNameTitle
+  - type: GuideHelp
+    guides:
+    - MinorAntagonists
 
 - type: entity
   id: MobRatKingBuff
@@ -140,7 +128,6 @@
   - type: MobThresholds
     thresholds:
       0: Alive
-      300: Critical
       350: Dead
   - type: MeleeWeapon
     hidden: true
@@ -167,6 +154,9 @@
     speedModifierThresholds:
       200: 0.7
       250: 0.5
+  - type: GuideHelp
+    guides:
+    - MinorAntagonists
 
 - type: entity
   name: Rat Servant
@@ -181,12 +171,13 @@
   - type: InputMover
   - type: MobMover
   - type: HTN
-    rootTask: SimpleHostileCompound
+    rootTask:
+      task: SimpleHostileCompound
   - type: Reactive
     groups:
       Flammable: [Touch]
       Extinguish: [Touch]
-  - type: Faction
+  - type: NpcFactionMember
     factions:
     - SimpleHostile
   - type: Sprite
@@ -215,7 +206,7 @@
       15: Critical
       30: Dead
   - type: Stamina
-    excess: 60
+    critThreshold: 60
   - type: MeleeWeapon
     hidden: true
     soundHit:
@@ -245,7 +236,6 @@
       Parched: 150
       Dead: 0
     baseDecayRate: 0.1
-  - type: Appearance
   - type: DamageStateVisuals
     states:
       Alive:
@@ -280,3 +270,32 @@
     price: 500 # rat wealth
   - type: MobsterAccent
     isBoss: false
+  - type: Speech
+    speechVerb: SmallMob
+  - type: GuideHelp
+    guides:
+    - MinorAntagonists
+
+- type: entity
+  id: ActionRatKingRaiseArmy
+  name: Raise Army
+  description: Spend some hunger to summon an allied rat to help defend you.
+  noSpawn: true
+  components:
+  - type: InstantAction
+    icon: Interface/Actions/ratKingArmy.png
+    itemIconStyle: NoItem
+    event: !type:RatKingRaiseArmyActionEvent
+    useDelay: 4
+
+- type: entity
+  id: ActionRatKingDomain
+  name: Rat King's Domain
+  description: Spend some hunger to release a cloud of miasma into the air.
+  noSpawn: true
+  components:
+  - type: InstantAction
+    useDelay: 10
+    icon: Interface/Actions/ratKingDomain.png
+    itemIconStyle: NoItem
+    event: !type:RatKingDomainActionEvent

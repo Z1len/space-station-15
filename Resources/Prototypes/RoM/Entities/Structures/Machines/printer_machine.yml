@@ -1,0 +1,48 @@
+- type: entity
+  parent: BaseMachinePowered
+  id: PrinterMachine
+  name: Document Printer
+  description: A NanoTrasen document printer
+  components:
+    - type: Sprite
+      sprite: RoM/Structures/printer_machine.rsi
+      drawdepth: SmallObjects
+      layers:
+        - state: icon
+          map: [ "base" ]
+    - type: Icon
+      sprite: RoM/Structures/printer_machine.rsi
+      state: icon
+    - type: Physics
+      bodyType: Static
+    - type: Printer
+      paperSlot:
+        insertSound: /Audio/Machines/scanning.ogg
+        ejectSound: /Audio/Machines/tray_eject.ogg
+        whitelist:
+          components:
+            - Paper
+    - type: ItemSlots
+    - type: ContainerContainer
+      containers:
+        PaperSlot: !type:ContainerSlot
+    - type: Fixtures
+      fixtures:
+        fix1:
+          shape:
+            !type:PhysShapeAabb
+            bounds: "-0.25,-0.25,0.25,0.25"
+          density: 25
+          mask:
+            - TabletopMachineMask
+          layer:
+            - TabletopMachineLayer
+    - type: ApcPowerReceiver
+      powerLoad: 250
+    - type: ActivatableUI
+      key: enum.PrinterUI.Key
+    - type: ActivatableUIRequiresPower
+    - type: UserInterface
+      interfaces:
+        - key: enum.PrinterUI.Key
+          type: PrinterBoundUI

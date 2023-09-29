@@ -1,4 +1,5 @@
 using Content.Server.Fluids.EntitySystems;
+using Content.Shared.FixedPoint;
 using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype;
@@ -7,9 +8,12 @@ namespace Content.Server.Fluids.Components;
 
 [RegisterComponent]
 [Access(typeof(SpraySystem))]
-public sealed class SprayComponent : Component
+public sealed partial class SprayComponent : Component
 {
     public const string SolutionName = "spray";
+
+    [DataField("transferAmount")]
+    public FixedPoint2 TransferAmount = 10;
 
     [ViewVariables(VVAccess.ReadWrite), DataField("sprayDistance")]
     public float SprayDistance = 3.5f;
@@ -28,5 +32,5 @@ public sealed class SprayComponent : Component
 
     [ViewVariables(VVAccess.ReadWrite), DataField("spraySound", required: true)]
     [Access(typeof(SpraySystem), Other = AccessPermissions.ReadExecute)] // FIXME Friends
-    public SoundSpecifier SpraySound { get; } = default!;
+    public SoundSpecifier SpraySound { get; private set; } = default!;
 }

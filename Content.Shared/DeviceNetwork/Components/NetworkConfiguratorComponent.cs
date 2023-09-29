@@ -10,7 +10,7 @@ namespace Content.Shared.DeviceNetwork.Components;
 [RegisterComponent]
 [NetworkedComponent]
 [Access(typeof(SharedNetworkConfiguratorSystem))]
-public sealed class NetworkConfiguratorComponent : Component
+public sealed partial class NetworkConfiguratorComponent : Component
 {
     /// <summary>
     /// Determines whether the configurator is in linking mode or list mode
@@ -56,16 +56,16 @@ public sealed class NetworkConfiguratorComponent : Component
     public SoundSpecifier SoundNoAccess = new SoundPathSpecifier("/Audio/Machines/custom_deny.ogg");
 
     [DataField("soundSwitchMode")]
-    public SoundSpecifier SoundSwitchMode = new SoundPathSpecifier("/Audio/Machines/beep.ogg");
+    public SoundSpecifier SoundSwitchMode = new SoundPathSpecifier("/Audio/Machines/quickbeep.ogg");
 }
 
 [Serializable, NetSerializable]
 public sealed class NetworkConfiguratorComponentState : ComponentState
 {
-    public readonly EntityUid? ActiveDeviceList;
+    public readonly NetEntity? ActiveDeviceList;
     public readonly bool LinkModeActive;
 
-    public NetworkConfiguratorComponentState(EntityUid? activeDeviceList, bool linkModeActive)
+    public NetworkConfiguratorComponentState(NetEntity? activeDeviceList, bool linkModeActive)
     {
         ActiveDeviceList = activeDeviceList;
         LinkModeActive = linkModeActive;

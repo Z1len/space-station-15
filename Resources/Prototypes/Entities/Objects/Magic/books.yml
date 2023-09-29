@@ -5,7 +5,6 @@
   abstract: true
   components:
     - type: Sprite
-      netsync: false
       sprite: Objects/Misc/books.rsi
       layers:
         - state: book_demonomicon
@@ -20,10 +19,9 @@
   parent: BaseSpellbook
   components:
     - type: Spellbook
-      instantSpells:
+      spells:
         FlashRune: -1
-      worldSpells:
-        SpawnMagicarpSpell: -1
+        ActionSpawnMagicarpSpell: -1
 
 - type: entity
   id: ForceWallSpellbook
@@ -31,13 +29,12 @@
   parent: BaseSpellbook
   components:
     - type: Sprite
-      netsync: false
       sprite: Objects/Magic/spellbooks.rsi
       layers:
         - state: bookforcewall
     - type: Spellbook
-      instantSpells:
-        ForceWall: -1
+      spells:
+        ActionForceWall: -1
 
 - type: entity
   id: BlinkBook
@@ -45,13 +42,12 @@
   parent: BaseSpellbook
   components:
     - type: Sprite
-      netsync: false
       sprite: Objects/Magic/spellbooks.rsi
       layers:
         - state: spellbook
     - type: Spellbook
-      worldSpells:
-        Blink: -1
+      spells:
+        ActionBlink: -1
 
 - type: entity
   id: SmiteBook
@@ -59,13 +55,12 @@
   parent: BaseSpellbook
   components:
   - type: Sprite
-    netsync: false
     sprite: Objects/Magic/spellbooks.rsi
     layers:
     - state: spellbook
   - type: Spellbook
-    entitySpells:
-      Smite: -1
+    spells:
+      ActionSmite: -1
 
 - type: entity
   id: KnockSpellbook
@@ -73,13 +68,12 @@
   parent: BaseSpellbook
   components:
     - type: Sprite
-      netsync: false
       sprite: Objects/Magic/spellbooks.rsi
       layers:
         - state: bookknock
     - type: Spellbook
-      instantSpells:
-        Knock: -1
+      spells:
+        ActionKnock: -1
 
 - type: entity
   id: FireballSpellbook
@@ -87,13 +81,12 @@
   parent: BaseSpellbook
   components:
   - type: Sprite
-    netsync: false
     sprite: Objects/Magic/spellbooks.rsi
     layers:
     - state: bookfireball
   - type: Spellbook
-    worldSpells:
-      Fireball: -1
+    spells:
+      ActionFireball: -1
 
 - type: entity
   id: ScrollRunes
@@ -101,12 +94,11 @@
   parent: BaseSpellbook
   components:
   - type: Sprite
-    netsync: false
     sprite: Objects/Magic/magicactions.rsi
     layers:
     - state: spell_default
   - type: Spellbook
-    instantSpells:
+    spells:
       FlashRune: -1
       ExplosionRune: -1
       IgniteRune: -1

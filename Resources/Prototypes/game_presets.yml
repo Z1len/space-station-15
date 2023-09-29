@@ -59,8 +59,11 @@
     - dm
   name: death-match-title
   description: death-match-description
+  maxPlayers: 15
+  showInVote: true
+  supportedMaps: DeathMatchMapPool
   rules:
-    - DeathMatch
+    - DeathMatch31
 
 - type: gamePreset
   id: Nukeops
@@ -76,17 +79,17 @@
 - type: gamePreset
   id: Zombie
   alias:
-    - zombie
-    - zombies
-    - Zombies
-    - zz14
-    - zomber
+  - zombie
+  - zombies
+  - Zombies
+  - zz14
+  - zomber
   name: zombie-title
   description: zombie-description
   showInVote: false
   rules:
-    - Zombie
-    - BasicStationEventScheduler
+  - Zombie
+  - BasicStationEventScheduler
 
 - type: gamePreset
   id: Pirates

@@ -6,7 +6,7 @@ namespace Content.Shared.Buckle.Components;
 
 [RegisterComponent, NetworkedComponent]
 [Access(typeof(SharedBuckleSystem))]
-public sealed class BuckleComponent : Component
+public sealed partial class BuckleComponent : Component
 {
     /// <summary>
     /// The range from which this entity can buckle to a <see cref="StrapComponent"/>.
@@ -78,7 +78,7 @@ public sealed class BuckleComponent : Component
 [Serializable, NetSerializable]
 public sealed class BuckleComponentState : ComponentState
 {
-    public BuckleComponentState(bool buckled, EntityUid? buckledTo, EntityUid? lastEntityBuckledTo,
+    public BuckleComponentState(bool buckled, NetEntity? buckledTo, NetEntity? lastEntityBuckledTo,
         bool dontCollide)
     {
         Buckled = buckled;
@@ -88,13 +88,13 @@ public sealed class BuckleComponentState : ComponentState
     }
 
     public readonly bool Buckled;
-    public readonly EntityUid? BuckledTo;
-    public  readonly EntityUid? LastEntityBuckledTo;
+    public readonly NetEntity? BuckledTo;
+    public readonly NetEntity? LastEntityBuckledTo;
     public readonly bool DontCollide;
 }
 
 [ByRefEvent]
-public readonly record struct BuckleAttemptEvent(EntityUid StrapEntity, EntityUid BuckledEntity, bool Buckling, bool Cancelled = false);
+public record struct BuckleAttemptEvent(EntityUid StrapEntity, EntityUid BuckledEntity, EntityUid UserEntity, bool Buckling, bool Cancelled = false);
 
 [ByRefEvent]
 public readonly record struct BuckleChangeEvent(EntityUid StrapEntity, EntityUid BuckledEntity, bool Buckling);

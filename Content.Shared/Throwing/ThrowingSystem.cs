@@ -1,8 +1,10 @@
+using System.Numerics;
 using Content.Shared.Gravity;
 using Content.Shared.Interaction;
 using Content.Shared.Movement.Components;
 using Content.Shared.Projectiles;
 using Content.Shared.Tag;
+using Robust.Shared.Map;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
@@ -14,7 +16,7 @@ public sealed class ThrowingSystem : EntitySystem
 {
     public const float ThrowAngularImpulse = 5f;
 
-    public const float PushbackDefault = 1f;
+    public const float PushbackDefault = 2f;
 
     /// <summary>
     /// The minimum amount of time an entity needs to be thrown before the timer can be run.
@@ -25,8 +27,25 @@ public sealed class ThrowingSystem : EntitySystem
     [Dependency] private readonly SharedGravitySystem _gravity = default!;
     [Dependency] private readonly SharedInteractionSystem _interactionSystem = default!;
     [Dependency] private readonly SharedPhysicsSystem _physics = default!;
+    [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly ThrownItemSystem _thrownSystem = default!;
-    [Dependency] private readonly TagSystem _tagSystem = default!;
+
+    public void TryThrow(
+        EntityUid uid,
+        EntityCoordinates coordinates,
+        float strength = 1.0f,
+        EntityUid? user = null,
+        float pushbackRatio = PushbackDefault,
+        bool playSound = true)
+    {
+        var thrownPos = Transform(uid).MapPosition;
+        var mapPos = coordinates.ToMap(EntityManager, _transform);
+
+        if (mapPos.MapId != thrownPos.MapId)
+            return;
+
+        TryThrow(uid, mapPos.Position - thrownPos.Position, strength, user, pushbackRatio, playSound);
+    }
 
     /// <summary>
     ///     Tries to throw the entity if it has a physics component, otherwise does nothing.
@@ -39,7 +58,8 @@ public sealed class ThrowingSystem : EntitySystem
         Vector2 direction,
         float strength = 1.0f,
         EntityUid? user = null,
-        float pushbackRatio = PushbackDefault)
+        float pushbackRatio = PushbackDefault,
+        bool playSound = true)
     {
         var physicsQuery = GetEntityQuery<PhysicsComponent>();
         if (!physicsQuery.TryGetComponent(uid, out var physics))
@@ -54,10 +74,10 @@ public sealed class ThrowingSystem : EntitySystem
             physics,
             Transform(uid),
             projectileQuery,
-            tagQuery,
             strength,
             user,
-            pushbackRatio);
+            pushbackRatio,
+            playSound);
     }
 
     /// <summary>
@@ -72,17 +92,17 @@ public sealed class ThrowingSystem : EntitySystem
         PhysicsComponent physics,
         TransformComponent transform,
         EntityQuery<ProjectileComponent> projectileQuery,
-        EntityQuery<TagComponent> tagQuery,
         float strength = 1.0f,
         EntityUid? user = null,
-        float pushbackRatio = PushbackDefault)
+        float pushbackRatio = PushbackDefault,
+        bool playSound = true)
     {
-        if (strength <= 0 || direction == Vector2.Infinity || direction == Vector2.NaN || direction == Vector2.Zero)
+        if (strength <= 0 || direction == Vector2Helpers.Infinity || direction == Vector2Helpers.NaN || direction == Vector2.Zero)
             return;
 
         if ((physics.BodyType & (BodyType.Dynamic | BodyType.KinematicController)) == 0x0)
         {
-            Logger.Warning($"Tried to throw entity {ToPrettyString(uid)} but can't throw {physics.BodyType} bodies!");
+            Log.Warning($"Tried to throw entity {ToPrettyString(uid)} but can't throw {physics.BodyType} bodies!");
             return;
         }
 
@@ -91,25 +111,34 @@ public sealed class ThrowingSystem : EntitySystem
 
         var comp = EnsureComp<ThrownItemComponent>(uid);
         comp.Thrower = user;
+        ThrowingAngleComponent? throwingAngle = null;
 
         // Give it a l'il spin.
-        if (physics.InvI > 0f && (!tagQuery.TryGetComponent(uid, out var tag) || !_tagSystem.HasTag(tag, "NoSpinOnThrow")))
+        if (physics.InvI > 0f && (!TryComp(uid, out throwingAngle) || throwingAngle.AngularVelocity))
+        {
             _physics.ApplyAngularImpulse(uid, ThrowAngularImpulse / physics.InvI, body: physics);
+        }
         else
-            transform.LocalRotation = direction.ToWorldAngle() - Math.PI;
+        {
+            Resolve(uid, ref throwingAngle, false);
+            var gridRot = _transform.GetWorldRotation(transform.ParentUid);
+            var angle = direction.ToWorldAngle() - gridRot;
+            var offset = throwingAngle?.Angle ?? Angle.Zero;
+            _transform.SetLocalRotation(uid, angle + offset);
+        }
 
         if (user != null)
             _interactionSystem.ThrownInteraction(user.Value, uid);
 
-        var impulseVector = direction.Normalized * strength * physics.Mass;
+        var impulseVector = direction.Normalized() * strength * physics.Mass;
         _physics.ApplyLinearImpulse(uid, impulseVector, body: physics);
 
         // Estimate time to arrival so we can apply OnGround status and slow it much faster.
-        var time = (direction / strength).Length;
+        var time = direction.Length() / strength;
 
         if (time < FlyTime)
         {
-            _thrownSystem.LandComponent(uid, comp, physics);
+            _thrownSystem.LandComponent(uid, comp, physics, playSound);
         }
         else
         {
@@ -120,7 +149,7 @@ public sealed class ThrowingSystem : EntitySystem
                 if (physics.Deleted)
                     return;
 
-                _thrownSystem.LandComponent(uid, comp, physics);
+                _thrownSystem.LandComponent(uid, comp, physics, playSound);
             });
         }
 
@@ -133,9 +162,10 @@ public sealed class ThrowingSystem : EntitySystem
         {
             var msg = new ThrowPushbackAttemptEvent();
             RaiseLocalEvent(uid, msg);
+            const float MassLimit = 5f;
 
             if (!msg.Cancelled)
-                _physics.ApplyLinearImpulse(user.Value, -impulseVector * pushbackRatio * physics.Mass, body: userPhysics);
+                _physics.ApplyLinearImpulse(user.Value, -impulseVector / physics.Mass * pushbackRatio * MathF.Min(MassLimit, physics.Mass), body: userPhysics);
         }
     }
 }

@@ -1,21 +1,22 @@
+using System.Numerics;
 using Content.Shared.Access.Components;
 using Content.Shared.Access.Systems;
-using Content.Shared.Vehicle.Components;
 using Content.Shared.Actions;
-using Content.Shared.Buckle.Components;
-using Content.Shared.Item;
-using Content.Shared.Movement.Components;
-using Content.Shared.Movement.Systems;
-using Robust.Shared.Serialization;
-using Robust.Shared.Containers;
-using Content.Shared.Tag;
 using Content.Shared.Audio;
 using Content.Shared.Buckle;
+using Content.Shared.Buckle.Components;
 using Content.Shared.Hands;
-using Content.Shared.Light.Component;
+using Content.Shared.Item;
+using Content.Shared.Light.Components;
+using Content.Shared.Movement.Components;
+using Content.Shared.Movement.Systems;
 using Content.Shared.Popups;
+using Content.Shared.Tag;
+using Content.Shared.Vehicle.Components;
+using Robust.Shared.Containers;
 using Robust.Shared.Network;
 using Robust.Shared.Physics.Systems;
+using Robust.Shared.Serialization;
 
 namespace Content.Shared.Vehicle;
 
@@ -106,13 +107,15 @@ public abstract partial class SharedVehicleSystem : EntitySystem
         // Add Rider
         if (args.Buckling)
         {
-            // Add a virtual item to rider's hand, unbuckle if we can't.
-            if (!_virtualItemSystem.TrySpawnVirtualItemInHand(uid, args.BuckledEntity))
+            if (component.UseHand == true)
             {
-                _buckle.TryUnbuckle(uid, uid, true);
-                return;
+                // Add a virtual item to rider's hand, unbuckle if we can't.
+                if (!_virtualItemSystem.TrySpawnVirtualItemInHand(uid, args.BuckledEntity))
+                {
+                    _buckle.TryUnbuckle(uid, uid, true);
+                    return;
+                }
             }
-
             // Set up the rider and vehicle with each other
             EnsureComp<InputMoverComponent>(uid);
             var rider = EnsureComp<RiderComponent>(args.BuckledEntity);
@@ -131,12 +134,12 @@ public abstract partial class SharedVehicleSystem : EntitySystem
 
             if (TryComp<ActionsComponent>(args.BuckledEntity, out var actions) && TryComp<UnpoweredFlashlightComponent>(uid, out var flashlight))
             {
-                _actionsSystem.AddAction(args.BuckledEntity, flashlight.ToggleAction, uid, actions);
+                _actionsSystem.AddAction(args.BuckledEntity, ref flashlight.ToggleActionEntity, flashlight.ToggleAction, uid, actions);
             }
 
             if (component.HornSound != null)
             {
-                _actionsSystem.AddAction(args.BuckledEntity, component.HornAction, uid, actions);
+                _actionsSystem.AddAction(args.BuckledEntity, ref component.HornActionEntity, component.HornAction, uid, actions);
             }
 
             _joints.ClearJoints(args.BuckledEntity);
@@ -148,7 +151,9 @@ public abstract partial class SharedVehicleSystem : EntitySystem
 
         // Clean up actions and virtual items
         _actionsSystem.RemoveProvidedActions(args.BuckledEntity, uid);
-        _virtualItemSystem.DeleteInHandsMatching(args.BuckledEntity, uid);
+
+        if (component.UseHand == true)
+            _virtualItemSystem.DeleteInHandsMatching(args.BuckledEntity, uid);
 
 
         // Entity is no longer riding
@@ -300,11 +305,11 @@ public abstract partial class SharedVehicleSystem : EntitySystem
 
         strap.BuckleOffsetUnclamped = xform.LocalRotation.Degrees switch
         {
-            < 45f => (0, component.SouthOverride),
+            < 45f => new(0, component.SouthOverride),
             <= 135f => component.BaseBuckleOffset,
-            < 225f  => (0, component.NorthOverride),
-            <= 315f => (component.BaseBuckleOffset.X * -1, component.BaseBuckleOffset.Y),
-            _ => (0, component.SouthOverride)
+            < 225f  => new(0, component.NorthOverride),
+            <= 315f => new(component.BaseBuckleOffset.X * -1, component.BaseBuckleOffset.Y),
+            _ => new(0, component.SouthOverride)
         };
 
         if (!oldOffset.Equals(strap.BuckleOffsetUnclamped))
@@ -365,6 +370,6 @@ public enum VehicleVisuals : byte
 /// <summary>
 /// Raised when someone honks a vehicle horn
 /// </summary>
-public sealed class HonkActionEvent : InstantActionEvent
+public sealed partial class HonkActionEvent : InstantActionEvent
 {
 }
