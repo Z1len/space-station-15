@@ -1,8 +1,10 @@
 using Content.Server.Administration.Managers;
+using Content.Server.Discord;
 using Content.Shared.Administration;
 using Content.Shared.CCVar;
 using Content.Shared.Database;
 using Content.Shared.Roles;
+using Robust.Server.Player;
 using Robust.Shared.Configuration;
 using Robust.Shared.Console;
 using Robust.Shared.Prototypes;
@@ -12,6 +14,7 @@ namespace Content.Server.Administration.Commands;
 [AdminCommand(AdminFlags.Ban)]
 public sealed class DepartmentBanCommand : IConsoleCommand
 {
+    [Dependency] private readonly DiscordWebhook _discord = default!;
     [Dependency] private readonly IPrototypeManager _protoManager = default!;
     [Dependency] private readonly IPlayerLocator _locator = default!;
     [Dependency] private readonly IBanManager _banManager = default!;
@@ -27,11 +30,19 @@ public sealed class DepartmentBanCommand : IConsoleCommand
         string department;
         string reason;
         uint minutes;
+        WebhookIdentifier? webhookIdentifier = null;
         if (!Enum.TryParse(_cfg.GetCVar(CCVars.DepartmentBanDefaultSeverity), out NoteSeverity severity))
         {
             Logger.WarningS("admin.department_ban", "Department ban severity could not be parsed from config! Defaulting to medium.");
             severity = NoteSeverity.Medium;
         }
+        _cfg.OnValueChanged(CCVars.DiscordRoundUpdateWebhook, value =>
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _discord.GetWebhook(value, data => webhookIdentifier = data.ToIdentifier());
+            }
+        }, true);
 
         switch (args.Length)
         {
@@ -91,6 +102,18 @@ public sealed class DepartmentBanCommand : IConsoleCommand
 
         var targetUid = located.UserId;
         var targetHWid = located.LastHWId;
+
+        var player = shell.Player as IPlayerSession;
+        var embed = new WebhookEmbed
+        {
+            Description = Loc.GetString("discord-department-ban-user", ("user", located.Username), ("admin", player?.Data.UserName ?? "server"), ("reason", reason), ("time", minutes), ("department", departmentProto.ID))
+        };
+        var payload = new WebhookPayload{ Embeds = new() {embed} };
+
+        if(webhookIdentifier == null)
+            return;
+
+        await _discord.CreateMessage(webhookIdentifier.Value, payload);
 
         // If you are trying to remove the following variable, please don't. It's there because the note system groups role bans by time, reason and banning admin.
         // Without it the note list will get needlessly cluttered.

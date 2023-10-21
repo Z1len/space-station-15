@@ -407,7 +407,12 @@ namespace Content.Server.GameTicking
                     ("hours", Math.Truncate(duration.TotalHours)),
                     ("minutes", duration.Minutes),
                     ("seconds", duration.Seconds));
-                var payload = new WebhookPayload { Content = content };
+                var embed = new WebhookEmbed
+                {
+                    Description = content,
+                    Color = 15409955
+                };
+                var payload = new WebhookPayload { Embeds = new(){embed}};
 
                 await _discord.CreateMessage(_webhookIdentifier.Value, payload);
 
@@ -478,9 +483,13 @@ namespace Content.Server.GameTicking
                     return;
 
                 var content = Loc.GetString("discord-round-notifications-new");
+                var embed = new WebhookEmbed
+                {
+                    Description = content,
+                    Color = 15449891
+                };
 
-                var payload = new WebhookPayload { Content = content };
-
+                var payload = new WebhookPayload { Embeds = new(){embed}};
                 await _discord.CreateMessage(_webhookIdentifier.Value, payload);
             }
             catch (Exception e)
@@ -626,7 +635,14 @@ namespace Content.Server.GameTicking
                 var mapName = _gameMapManager.GetSelectedMap()?.MapName ?? Loc.GetString("discord-round-notifications-unknown-map");
                 var content = Loc.GetString("discord-round-notifications-started", ("id", RoundId), ("map", mapName));
 
-                var payload = new WebhookPayload { Content = content };
+                var embed = new WebhookEmbed
+                {
+                    Description = content,
+                    Color = 15449891
+                };
+                var payload = new WebhookPayload { Embeds = new(){embed}};
+
+
 
                 await _discord.CreateMessage(_webhookIdentifier.Value, payload);
             }

@@ -5,6 +5,7 @@ using System.Text;
 using Content.Server.Administration.Managers;
 using Content.Server.Administration.Notes;
 using Content.Server.Database;
+using Content.Server.Discord;
 using Content.Server.GameTicking;
 using Content.Shared.Administration;
 using Content.Shared.CCVar;
@@ -25,6 +26,7 @@ public sealed class BanCommand : LocalizedCommands
     [Dependency] private readonly IBanManager _bans = default!;
     [Dependency] private readonly IConfigurationManager _cfg = default!;
     [Dependency] private readonly IPlayerManager _playerManager = default!;
+    [Dependency] private readonly DiscordWebhook _discord = default!;
 
     public override string Command => "ban";
 
@@ -33,6 +35,16 @@ public sealed class BanCommand : LocalizedCommands
         string target;
         string reason;
         uint minutes;
+        WebhookIdentifier? webhookIdentifier = null;
+
+        _cfg.OnValueChanged(CCVars.DiscordRoundUpdateWebhook, value =>
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _discord.GetWebhook(value, data => webhookIdentifier = data.ToIdentifier());
+            }
+        }, true);
+
         if (!Enum.TryParse(_cfg.GetCVar(CCVars.ServerBanDefaultSeverity), out NoteSeverity severity))
         {
             Logger.WarningS("admin.server_ban", "Server ban severity could not be parsed from config! Defaulting to high.");
@@ -96,6 +108,16 @@ public sealed class BanCommand : LocalizedCommands
         var targetHWid = located.LastHWId;
 
         _bans.CreateServerBan(targetUid, target, player?.UserId, null, targetHWid, minutes, severity, reason);
+        var embed = new WebhookEmbed
+        {
+            Description = Loc.GetString("discord-ban-user", ("user", located.Username), ("admin", player?.Data.UserName ?? "server"), ("reason", reason), ("time", minutes))
+        };
+        var payload = new WebhookPayload{ Embeds = new() {embed} };
+
+        if(webhookIdentifier == null)
+            return;
+
+        await _discord.CreateMessage(webhookIdentifier.Value, payload);
     }
 
     public override CompletionResult GetCompletion(IConsoleShell shell, string[] args)

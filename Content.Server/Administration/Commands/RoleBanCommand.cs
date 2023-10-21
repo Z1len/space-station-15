@@ -1,10 +1,12 @@
 ﻿using System.Linq;
 using System.Text;
 using Content.Server.Administration.Managers;
+using Content.Server.Discord;
 using Content.Shared.Administration;
 using Content.Shared.CCVar;
 using Content.Shared.Database;
 using Content.Shared.Roles;
+using Robust.Server.Player;
 using Robust.Shared.Configuration;
 using Robust.Shared.Console;
 namespace Content.Server.Administration.Commands;
@@ -15,6 +17,7 @@ public sealed class RoleBanCommand : IConsoleCommand
     [Dependency] private readonly IPlayerLocator _locator = default!;
     [Dependency] private readonly IBanManager _bans = default!;
     [Dependency] private readonly IConfigurationManager _cfg = default!;
+    [Dependency] private readonly DiscordWebhook _discord = default!;
 
     public string Command => "roleban";
     public string Description => Loc.GetString("cmd-roleban-desc");
@@ -26,11 +29,21 @@ public sealed class RoleBanCommand : IConsoleCommand
         string job;
         string reason;
         uint minutes;
+        WebhookIdentifier? webhookIdentifier = null;
         if (!Enum.TryParse(_cfg.GetCVar(CCVars.RoleBanDefaultSeverity), out NoteSeverity severity))
         {
             Logger.WarningS("admin.role_ban", "Role ban severity could not be parsed from config! Defaulting to medium.");
             severity = NoteSeverity.Medium;
         }
+
+
+        _cfg.OnValueChanged(CCVars.DiscordRoundUpdateWebhook, value =>
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _discord.GetWebhook(value, data => webhookIdentifier = data.ToIdentifier());
+            }
+        }, true);
 
         switch (args.Length)
         {
@@ -85,6 +98,18 @@ public sealed class RoleBanCommand : IConsoleCommand
 
         var targetUid = located.UserId;
         var targetHWid = located.LastHWId;
+
+        var player = shell.Player as IPlayerSession;
+        var embed = new WebhookEmbed
+        {
+            Description = Loc.GetString("discord-role-ban-user", ("user", located.Username), ("admin", player?.Data.UserName ?? "server"), ("reason", reason), ("time", minutes), ("role", job))
+        };
+        var payload = new WebhookPayload{ Embeds = new() {embed} };
+
+        if(webhookIdentifier == null)
+            return;
+
+        await _discord.CreateMessage(webhookIdentifier.Value, payload);
 
         _bans.CreateRoleBan(targetUid, located.Username, shell.Player?.UserId, null, targetHWid, job, minutes, severity, reason, DateTimeOffset.UtcNow);
     }
